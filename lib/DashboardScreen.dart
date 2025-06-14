@@ -1,12 +1,15 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'user.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:percent_indicator/circular_percent_indicator.dart';
 
+import 'user.dart';
 
 class DashboardScreen extends StatefulWidget {
   final User user;
-
   const DashboardScreen({super.key, required this.user});
 
   @override
@@ -19,10 +22,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool _isLoading = true;
   bool _hasError = false;
 
-  double _eatenCalories = 0;
-  double _eatenProteins = 0;
-  double _eatenFats = 0;
-  double _eatenCarbs = 0;
+  double consumedCalories = 0;
+  double consumedProteins = 0;
+  double consumedFats = 0;
+  double consumedCarbs = 0;
 
   @override
   void initState() {
@@ -66,190 +69,188 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-  void _showAddIntakeDialog() {
-    final _caloriesController = TextEditingController();
-    final _proteinController = TextEditingController();
-    final _fatController = TextEditingController();
-    final _carbController = TextEditingController();
+  void _openAddFoodDialog() async {
+    File? imageFile;
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: ImageSource.gallery);
 
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text("Добавить съеденное"),
-          content: SingleChildScrollView(
-            child: Column(
-              children: [
-                TextField(
-                  controller: _caloriesController,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(labelText: "Калории"),
-                ),
-                TextField(
-                  controller: _proteinController,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(labelText: "Белки"),
-                ),
-                TextField(
-                  controller: _fatController,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(labelText: "Жиры"),
-                ),
-                TextField(
-                  controller: _carbController,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(labelText: "Углеводы"),
-                ),
-              ],
+    if (picked != null) {
+      imageFile = File(picked.path);
+      final request = http.MultipartRequest('POST', Uri.parse('http://localhost:5000/analyze_image'));
+      request.files.add(await http.MultipartFile.fromPath('image', imageFile.path));
+      final response = await request.send();
+
+      if (response.statusCode == 200) {
+        final body = await response.stream.bytesToString();
+        final Map<String, dynamic> result = json.decode(body);
+
+        final caloriesController = TextEditingController(text: result['calories'].toString());
+        final proteinController = TextEditingController(text: result['proteins'].toString());
+        final fatController = TextEditingController(text: result['fats'].toString());
+        final carbsController = TextEditingController(text: result['carbs'].toString());
+
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text("Добавить еду"),
+            content: SingleChildScrollView(
+              child: Column(
+                children: [
+                  Image.file(imageFile!, height: 100),
+                  TextField(
+                    controller: caloriesController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(labelText: 'Калории'),
+                  ),
+                  TextField(
+                    controller: proteinController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(labelText: 'Белки'),
+                  ),
+                  TextField(
+                    controller: fatController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(labelText: 'Жиры'),
+                  ),
+                  TextField(
+                    controller: carbsController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(labelText: 'Углеводы'),
+                  ),
+                ],
+              ),
             ),
+            actions: [
+              TextButton(
+                child: const Text("Отмена"),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+              ElevatedButton(
+                child: const Text("Добавить"),
+                onPressed: () {
+                  setState(() {
+                    consumedCalories += double.tryParse(caloriesController.text) ?? 0;
+                    consumedProteins += double.tryParse(proteinController.text) ?? 0;
+                    consumedFats += double.tryParse(fatController.text) ?? 0;
+                    consumedCarbs += double.tryParse(carbsController.text) ?? 0;
+                  });
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  _eatenCalories += double.tryParse(_caloriesController.text) ?? 0;
-                  _eatenProteins += double.tryParse(_proteinController.text) ?? 0;
-                  _eatenFats += double.tryParse(_fatController.text) ?? 0;
-                  _eatenCarbs += double.tryParse(_carbController.text) ?? 0;
-                });
-                Navigator.of(context).pop();
-              },
-              child: const Text("Добавить"),
-            ),
-          ],
         );
-      },
+      }
+    }
+  }
+
+  Widget _buildProgress(String label, double consumed, double target, Color color) {
+    return Column(
+      children: [
+        Text(label),
+        CircularPercentIndicator(
+          radius: 60,
+          lineWidth: 8.0,
+          percent: (consumed / target).clamp(0, 1),
+          center: Text("${consumed.toInt()} / ${target.toInt()}"),
+          progressColor: color,
+          backgroundColor: Colors.grey[200]!,
+        )
+      ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(
-        fontFamily: 'Montserrat',
-        primarySwatch: Colors.green,
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Здоровье и Питание"),
+        actions: [
+          IconButton(icon: const Icon(Icons.person), onPressed: () {/* профиль */}),
+        ],
       ),
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text("Профиль и план питания"),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: _fetchMealPlan,
-            ),
-          ],
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person),
-              label: 'Профиль',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.food_bank),
-              label: 'План питания',
-            ),
-          ],
-          currentIndex: 1,
-        ),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : _hasError
-                  ? const Center(child: Text("Ошибка загрузки данных"))
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Card(
-                          color: Colors.grey[100],
-                          child: Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Column(
+      floatingActionButton: FloatingActionButton(
+        onPressed: _openAddFoodDialog,
+        child: const Icon(Icons.add),
+        backgroundColor: Colors.green,
+      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _hasError
+              ? const Center(child: Text("Ошибка загрузки плана"))
+              : Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          _buildProgress("Калории", consumedCalories, widget.user.calories.toDouble(), Colors.red),
+                          _buildProgress("Белки", consumedProteins, widget.user.proteins.toDouble(), Colors.blue),
+                          _buildProgress("Жиры", consumedFats, widget.user.fats.toDouble(), Colors.orange),
+                          _buildProgress("Углеводы", consumedCarbs, widget.user.carbs.toDouble(), Colors.purple),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      SizedBox(
+                        height: 45,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: 5,
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 4),
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      _currentDayIndex == index ? Colors.green : Colors.grey[300],
+                                  foregroundColor:
+                                      _currentDayIndex == index ? Colors.white : Colors.black,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    _currentDayIndex = index;
+                                  });
+                                },
+                                child: Text("День ${index + 1}"),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Expanded(
+                        child: ListView(
+                          children: _mealPlan[_currentDayIndex].entries.map<Widget>((entry) {
+                            final meal = entry.key;
+                            final recipes = entry.value;
+                            return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text("Возраст: ${widget.user.age}"),
-                                Text("Рост: ${widget.user.height} см  Вес: ${widget.user.weight} кг"),
+                                const SizedBox(height: 10),
                                 Text(
-                                  "Ккал: ${widget.user.calories.toStringAsFixed(0)}  Б: ${widget.user.proteins.toStringAsFixed(1)}  Ж: ${widget.user.fats.toStringAsFixed(1)}  У: ${widget.user.carbs.toStringAsFixed(1)}",
+                                  meal.toUpperCase(),
+                                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                                 ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        ElevatedButton.icon(
-                          onPressed: _showAddIntakeDialog,
-                          icon: const Icon(Icons.add),
-                          label: const Text("Добавить съеденное"),
-                        ),
-                        const SizedBox(height: 8),
-                        LinearProgressIndicator(
-                          value: (_eatenCalories / widget.user.calories).clamp(0.0, 1.0),
-                          backgroundColor: Colors.grey[300],
-                          color: Colors.green,
-                        ),
-                        Text("Съедено: ${_eatenCalories.toStringAsFixed(0)} из ${widget.user.calories} Ккал"),
-                        const Divider(height: 20),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: List.generate(5, (index) {
-                            return ElevatedButton(
-                              onPressed: () {
-                                setState(() {
-                                  _currentDayIndex = index;
-                                });
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    _currentDayIndex == index ? Colors.green : Colors.grey[300],
-                                foregroundColor:
-                                    _currentDayIndex == index ? Colors.white : Colors.black,
-                              ),
-                              child: Text("День ${index + 1}"),
-                            );
-                          }),
-                        ),
-                        const SizedBox(height: 12),
-                        Expanded(
-                          child: ListView(
-                            children: _mealPlan[_currentDayIndex].entries.map<Widget>((entry) {
-                              final meal = entry.key;
-                              final recipes = entry.value;
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.restaurant_menu, color: Colors.green),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        meal.toUpperCase(),
-                                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                ...recipes.map<Widget>((recipe) => Card(
+                                      child: ListTile(
+                                        leading: recipe['image'] != null && recipe['image'] != ""
+                                            ? Image.network(recipe['image'], width: 50, fit: BoxFit.cover)
+                                            : const Icon(Icons.fastfood),
+                                        title: Text(recipe['title'] ?? "Без названия"),
+                                        subtitle: Text(
+                                            "Ккал: ${recipe['calories']}  Б: ${recipe['protein']}  Ж: ${recipe['fat']}  У: ${recipe['carbs']}"),
                                       ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 4),
-                                  ...recipes.map<Widget>((recipe) => Card(
-                                        color: Colors.grey[100],
-                                        child: ListTile(
-                                          leading: recipe['image'] != null && recipe['image'] != ""
-                                              ? Image.network(recipe['image'], width: 50, fit: BoxFit.cover)
-                                              : const Icon(Icons.fastfood),
-                                          title: Text(recipe['title'] ?? "Без названия"),
-                                          subtitle: Text(
-                                              "Ккал: ${recipe['calories']}  Б: ${recipe['protein']}  Ж: ${recipe['fat']}  У: ${recipe['carbs']}"),
-                                        ),
-                                      ))
-                                ],
-                              );
-                            }).toList(),
-                          ),
-                        )
-                      ],
-                    ),
-        ),
-      ),
+                                    ))
+                              ],
+                            );
+                          }).toList(),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
     );
   }
 }

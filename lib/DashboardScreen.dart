@@ -2,11 +2,12 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/UserScreen.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
-import 'user.dart';
+import 'data_classes/user_data_class.dart';
 
 class DashboardScreen extends StatefulWidget {
   final User user;
@@ -164,15 +165,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text("Здоровье и Питание"),
         actions: [
-          IconButton(icon: const Icon(Icons.person), onPressed: () {/* профиль */}),
+          IconButton(icon: const Icon(Icons.person), onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => UserScreen(user: widget.user,),
+              ),
+            );
+          }),
         ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _openAddFoodDialog,
-        child: const Icon(Icons.add),
         backgroundColor: Colors.green,
+        child: const Icon(Icons.add, color: Colors.white,),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())

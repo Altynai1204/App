@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'user.dart';
+
+import 'data_classes/user_data_class.dart';
 
 class ProfileScreen extends StatelessWidget {
   final User user;

@@ -28,17 +28,17 @@ class User {
   });
 
   Map<String, dynamic> toJson() => {
-        "age": age,
-        "height": height,
-        "weight": weight,
-        "gender": gender,
-        "activityLevel": activityLevel,
-        "goal": goal,
-        "diet": diet,
-        "allergies": allergies,
-        "calories": calories,
-        "proteins": proteins,
-        "fats": fats,
-        "carbs": carbs,
-      };
+    "age": age,
+    "height": height,
+    "weight": weight,
+    "gender": gender,
+    "activityLevel": activityLevel,
+    "goal": goal,
+    "diet": diet,
+    "allergies": allergies,
+    "calories": calories,
+    "proteins": proteins,
+    "fats": fats,
+    "carbs": carbs,
+  };
 }

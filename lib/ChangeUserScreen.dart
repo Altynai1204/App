@@ -3,17 +3,14 @@ import 'package:flutter/services.dart';
 import 'ResultScreen.dart'; // импорт экрана результата
 import 'data_classes/macro_nutriens_data_class.dart';   // импорт файла с расчетами
 
-class InputScreen extends StatefulWidget {
-  final String name;
-  final String email;
-
-  const InputScreen({super.key, required this.name, required this.email});
+class ChangeUserScreen extends StatefulWidget {
+  const ChangeUserScreen({super.key});
 
   @override
-  State<InputScreen> createState() => _InputScreenState();
+  State<ChangeUserScreen> createState() => _ChangeUserScreenState();
 }
 
-class _InputScreenState extends State<InputScreen> {
+class _ChangeUserScreenState extends State<ChangeUserScreen> {
   final ageController = TextEditingController();
   final heightController = TextEditingController();
   final weightController = TextEditingController();
@@ -116,7 +113,7 @@ class _InputScreenState extends State<InputScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Введите параметры"), backgroundColor: Colors.green),
+      appBar: AppBar(title: const Text("Введите параметры", style: TextStyle(color: Colors.white),), backgroundColor: Colors.green),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: ListView(
@@ -140,10 +137,10 @@ class _InputScreenState extends State<InputScreen> {
             const SizedBox(height: 30),
             ElevatedButton(
               onPressed: _goToResult,
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.blue.shade400),
               child: Padding(padding: EdgeInsets.symmetric(
-                vertical: 15
-              ), child: const Text("Показать результат", style: TextStyle(color: Colors.white),),),
+                  vertical: 15
+              ), child: const Text("Сохранить данные", style: TextStyle(color: Colors.white),),),
             ),
           ],
         ),

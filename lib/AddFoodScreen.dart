@@ -34,7 +34,7 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
     }
   }
 
-  Future<void> _analyzeFood() async {
+  Future<void> _analyzeFood(BuildContext context) async {
     if (_imageFile == null || _gramController.text.isEmpty) return;
 
     setState(() {
@@ -75,7 +75,7 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
     }
   }
 
-  void _saveFood() {
+  void _saveFood(BuildContext context) {
     if (_kbju != null) {
       widget.onFoodAdded(_kbju!);
       Navigator.pop(context);
@@ -113,7 +113,9 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
             ),
             const SizedBox(height: 12),
             ElevatedButton(
-              onPressed: _analyzeFood,
+              onPressed: () async {
+                await _analyzeFood(context);
+              },
               child: _isLoading ? const CircularProgressIndicator() : const Text("Анализировать"),
             ),
             const SizedBox(height: 16),
@@ -124,7 +126,9 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
               Text("Углеводы: ${_kbju!['carbs'] ?? 0}"),
               const SizedBox(height: 8),
               ElevatedButton.icon(
-                onPressed: _saveFood,
+                onPressed: (){
+                  _saveFood(context);
+                },
                 icon: const Icon(Icons.save),
                 label: const Text("Сохранить"),
               )

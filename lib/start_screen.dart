@@ -71,17 +71,17 @@ class _StartScreenState extends State<StartScreen> with TickerProviderStateMixin
                     },
                     children: [
                       buildPage(
-                        image: 'lib/assets/data_analysis.png',
+                        image: 'assets/data_analysis.png',
                         title: 'Анализ данных',
                         description: 'Мы учитываем ваши параметры, чтобы\nоптимально рассчитать рацион.',
                       ),
                       buildPage(
-                        image: 'lib/assets/personalized_plan.png',
+                        image: 'assets/personalized_plan.png',
                         title: 'Персональный план',
                         description: 'Создаём питание под ваши цели:\nпохудение, набор массы или баланс.',
                       ),
                       buildPage(
-                        image: 'lib/assets/logo.png',
+                        image: 'assets/logo.png',
                         title: 'Готовы начать?',
                         description: 'Пройдите простой опрос и получите\nперсональный план питания!',
                       ),
@@ -123,7 +123,7 @@ class _StartScreenState extends State<StartScreen> with TickerProviderStateMixin
                             ),
                             backgroundColor: Colors.green,
                           ),
-                          child: Text(isLastPage ? "Начать" : "Далее", style: const TextStyle(fontSize: 18)),
+                          child: Text(isLastPage ? "Начать" : "Далее", style: const TextStyle(fontSize: 18, color: Colors.white)),
                         ),
                       ),
                     ],

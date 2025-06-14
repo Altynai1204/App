@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'user.dart';
-import 'DashboardScreen.dart';  // Импорт главного экрана
+import 'DashboardScreen.dart';
+import 'data_classes/user_data_class.dart';  // Импорт главного экрана
 
 class ResultScreen extends StatelessWidget {
   final int age;
@@ -64,7 +64,7 @@ class ResultScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Результаты расчета"),
+        title: const Text("Результаты расчета", style: TextStyle(color: Colors.white),),
         backgroundColor: Colors.green,
       ),
       body: Padding(
@@ -93,7 +93,7 @@ class ResultScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text("Сохранить данные", style: TextStyle(fontSize: 18)),
+                child: const Text("Сохранить данные", style: TextStyle(fontSize: 18, color: Colors.white)),
               ),
             ),
             const SizedBox(height: 12),
@@ -108,7 +108,7 @@ class ResultScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text("Перейти к профилю", style: TextStyle(fontSize: 18)),
+                child: const Text("Перейти к профилю", style: TextStyle(fontSize: 18, color: Colors.white)),
               ),
             ),
           ],

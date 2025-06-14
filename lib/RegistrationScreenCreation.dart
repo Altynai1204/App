@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'InputScreen.dart';
-import 'RegistrationScreenCreation.dart';
+import 'RegistrationScreen.dart';
 
-class RegistrationScreen extends StatefulWidget {
-  const RegistrationScreen({super.key});
+class RegistrationScreenCreation extends StatefulWidget {
+  const RegistrationScreenCreation({super.key});
 
   @override
-  State<RegistrationScreen> createState() => _RegistrationScreenState();
+  State<RegistrationScreenCreation> createState() => _RegistrationScreenCreationState();
 }
 
-class _RegistrationScreenState extends State<RegistrationScreen> {
+class _RegistrationScreenCreationState extends State<RegistrationScreenCreation> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -41,7 +41,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFDFF5E3),
       appBar: AppBar(
-        title: const Text('Войти', style: TextStyle(color: Colors.white),),
+        title: const Text('Регистрация', style: TextStyle(color: Colors.white),),
         backgroundColor: Colors.green,
       ),
       body: Padding(
@@ -89,7 +89,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
-                    'Нет аккаунта ?',
+                    'Есть аккаунт ?',
                     style: TextStyle(fontSize: 18, color: Colors.black),
                   ),
                   const SizedBox(width: 10,),
@@ -98,12 +98,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => RegistrationScreenCreation(),
+                          builder: (context) => RegistrationScreen(),
                         ),
                       );
                     },
                     child: const Text(
-                      'Регистрация',
+                      'Войти',
                       style: TextStyle(fontSize: 18, color: Colors.green),
                     ),
                   )
@@ -114,6 +114,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: (){
+                    _submit();
                   },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
@@ -123,7 +124,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     ),
                   ),
                   child: const Text(
-                    'Войти',
+                    'Зарегистрироваться',
                     style: TextStyle(fontSize: 18, color: Colors.white),
                   ),
                 ),
